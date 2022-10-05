@@ -5,7 +5,7 @@ class Search:
 
     globalData = {}
 
-    def arbitrarySearch(graph : graph.Graph, start, end=None, evaluator=lambda x:1, getSearchEdges = False):
+    def arbitrarySearch(graph : graph.Graph, start, end=None, evaluator=lambda x:1):
         """
         Runs a search algorithm that keeps a priority queue.
         Can effectively be used as BFS, best first search, A* search and Dijkstra's 
@@ -14,21 +14,28 @@ class Search:
         evaluator : u,v -> number
 
         start is a node in graph
+        end is the final node, or the set of final nodes
         
-        if getSearchEdges, -Not implemented- all edges explored during the search is saved in the class
+        Search.searchPath gives the resulting found path.
         """
-        frontier = PriorityQueue()
-        frontier.put((0,start))
-        expanded = []
+        try:
+            end[0]
+        except:
+            end = [end] 
 
-        if getSearchEdges:
-            #unused for now
-            Search.searchedEdges = []
+        frontier = PriorityQueue()
+        searchPaths = PriorityQueue()
+
+        frontier.put((0,start))
+        searchPaths.put((0, [start]))
+        expanded = []
 
         while not frontier.empty():
             curr = frontier.get()[1]
+            Search.searchPath = searchPaths.get()[1]
 
-            if curr==end:
+            if curr in end:
+                expanded.append(curr)
                 break
 
             for neigh in graph.getNeighbours(curr):
@@ -36,23 +43,25 @@ class Search:
                     continue
                 
                 frontier.put((evaluator((curr, neigh)), neigh))
+                searchPaths.put((evaluator((curr, neigh)), Search.searchPath + [neigh]))
 
             expanded.append(curr)
-
+        Search.searchPath = None    # No solution path
         return expanded
 
     def BFS(graph : graph.Graph, start, end=None, getSearchEdges = False):
 
-        return Search.arbitrarySearch(graph, start, end, getSearchEdges=getSearchEdges)
+        return Search.arbitrarySearch(graph, start, end)
 
     def DFS(graph : graph.Graph, start, end=None, getSearchEdges=False):
         Search.globalData["DFScounter"] = 0
         def dfsEval(edge):
-            Search.globalData["DFScounter"] += 1
+            Search.globalData["DFScounter"] -= 1
             return Search.globalData["DFScounter"]
 
-        searchRes = Search.arbitrarySearch(graph, start, end, evaluator=dfsEval, getSearchEdges=getSearchEdges)
+        searchRes = Search.arbitrarySearch(graph, start, end, evaluator=dfsEval)
         Search.globalData.pop("DFScounter")
+        return searchRes
     
     def Bipartition(graph: graph.Graph):
         """
@@ -89,43 +98,5 @@ class Search:
                 frontier.put((0, neigh))
 
         return ([v for v in partition if partition[v] == 1], [v for v in partition if partition[v] == -1])
-        
-
-
-
-class Matching:
-
-    def __init__(self, graph : graph.Graph, edges):
-        self.isMatching = True
-        self.graph = graph
-        self.edges = edges
-
-        return self.CheckMatching()
-
-    def CheckMatching(self):
-        self.isMatching = True
-        for edge in self.edges:
-            for edge1 in self.edges:
-                if edge[0] in edge1 or edge[1] in edge1:
-                    self.isMatching = False
-                    return False
-        return True
-
-    def AddEdge(self, edge):
-        if edge in self.edges:
-            return self.isMatching
-        
-        for edge1 in self.edges:
-            if edge[0] in edge1 or edge[1] in edge1:
-                self.isMatching = False
-
-        self.edges.append(edge)
-        return self.isMatching
-
-    def RemoveEdge(self, edge):
-        if edge not in self.edges:
-            return self.isMatching
-
-        # Complete
 
     

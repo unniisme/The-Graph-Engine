@@ -2,8 +2,16 @@
 class Graph:
     #Base class, directed weighted graph
     
+    # Privates---------------
     def __init__(self):
         self.nodes = {}
+
+    def __str__(self):
+        return self.string()
+
+    def __repr__(self):
+        return self.string()  
+    #------------------------  
 
     def addNode(self, node):
         if  node not in self.nodes:
@@ -48,6 +56,9 @@ class Graph:
         return string
 
     def string(self):
+        """
+        Returns adjacency list of each vertex
+        """
         string = ""
         for key in self.nodes:
             string += str(key)
@@ -58,19 +69,31 @@ class Graph:
         return string        
 
 
-    def __str__(self):
-        return self.string()
-
-    def __repr__(self):
-        return self.string()    
-
-
     #Some query functions
 
+    def getNodes(self):
+        """
+        Returns list of nodes
+        """
+        return self.nodes.keys()
+
     def getWeight(self, u, v):
+        """
+        Returns weight of the given edge. Weight is 0 if edge doesn't exit
+        """
         if v in self.nodes[u]:
             return self.nodes[u][v]
         return 0
+    
+    def isEdge(self, u, v):
+        return self.getWeight(u, v) != 0
+
+    def isNode(self, node):
+        try:
+            self.nodes[node]
+            return True
+        except:
+            return False
 
     def getNeighbourCount(self, u):
         """

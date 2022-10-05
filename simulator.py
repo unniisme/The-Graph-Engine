@@ -4,10 +4,28 @@ import graph as gr
 import visualizer
 from search import *
 
+#Not working for now
+
+class ColourPalette:
+    Red = (255,0,0),
+
+class SimulatorColours(ColourPalette):
+    Vertex_normal = (255,0,0)
+    Vertex_Hover = (0,0,250)
+    Edge_normal = (50,50,50)
+    Edge_drag_normal = (50,50,50)
+    Edge_drag_Matching = (100,100,100)
+    Edge_Matched = (200,10,10)
+    Edge_NonMatched = (10,10,100)
+
 class Simulator:
     """
     Simulates the graph using Pygame
     """
+    uNum = 0
+    def GetUnum():
+        Simulator.uNum = Simulator.uNum+1
+        return Simulator.uNum-1
 
     nodeRadius = 10
     def CheckInNode(graph_vis, node, position):
@@ -34,11 +52,12 @@ class Simulator:
         # MenuStates
         state = 0
         s_base = 0
-        s_matching = 0
+        s_matching = 1
 
         dragging = None
         edgeStart = None
-        #matching = Matching(self.graph, [])
+        matching = Matching(self.graph, [])
+        self.matching = matching
 
         while self.running:
             self.screen.fill((255,255,255))
@@ -57,6 +76,7 @@ class Simulator:
                     del self.graph_vis
                     self.graph = gr.SimpleGraph()
                     self.graph_vis = visualizer.GraphVisualizer(self.graph)
+                    matching = Matching(self.graph, [])
                 
                 if e.type == pygame.KEYDOWN and e.key == pygame.K_b:
                     partition = Search.Bipartition(self.graph)
@@ -68,7 +88,7 @@ class Simulator:
                 if e.type == pygame.KEYDOWN and e.key == pygame.K_m:
                     if state == s_base:
                         state = s_matching
-                    if state == s_matching:
+                    elif state == s_matching:
                         state = s_base
                 
 
@@ -76,11 +96,17 @@ class Simulator:
                     if e.button == 1:
                         onNode = Simulator.CheckInAllNodes(self.graph_vis, mouse_pos)
                         if onNode == None:
-                            node = len(self.graph.nodes)
+                            node = Simulator.GetUnum()
                             self.graph.addNode(node)
                             self.graph_vis[node] = mouse_pos
                         else:
                             dragging = onNode
+                    elif e.button == 2:
+                        onNode = Simulator.CheckInAllNodes(self.graph_vis, mouse_pos)
+                        if onNode != None:
+                            self.graph.deleteNode(onNode)
+                            self.graph_vis.deleteNode(onNode)
+
                     elif e.button == 3:
                         if edgeStart == None:
                             edgeStart = Simulator.CheckInAllNodes(self.graph_vis, mouse_pos)
@@ -94,9 +120,15 @@ class Simulator:
                                         self.graph.addEdge(edgeStart, edgeEnd)
                                     else:
                                         self.graph.deleteEdge(edgeStart, edgeEnd)
-                                    edgeStart = None
                                 elif state == s_matching:
-                                    pass
+                                    edge = (edgeStart, edgeEnd)
+                                    backedge = (edgeEnd, edgeStart)
+                                    if edge in matching.edges or backedge in matching.edges:
+                                        matching.RemoveEdge(edge)
+                                        matching.RemoveEdge(backedge)
+                                    else:
+                                        matching.AddEdge(edge)
+                                edgeStart = None
 
                         
 
@@ -109,15 +141,23 @@ class Simulator:
                 self.graph_vis[dragging] = mouse_pos
 
             if edgeStart != None:
-                pygame.draw.line(self.screen, (50,50,50), self.graph_vis[edgeStart], mouse_pos)
+                if state==s_base:
+                    pygame.draw.line(self.screen, SimulatorColours.Edge_drag_normal, self.graph_vis[edgeStart], mouse_pos)
+                if state==s_matching:
+                    pygame.draw.line(self.screen, SimulatorColours.Edge_drag_Matching, self.graph_vis[edgeStart], mouse_pos, 2)
 
             edges = self.graph.getEdges()
             if edges!=None:
                 for edge in edges:
-                    pygame.draw.line(self.screen, (50,50,50), self.graph_vis[edge[0]], self.graph_vis[edge[1]])
+                    pygame.draw.line(self.screen, SimulatorColours.Edge_normal, self.graph_vis[edge[0]], self.graph_vis[edge[1]])
+                
+            if state == s_matching:
+                color = SimulatorColours.Edge_Matched if matching.isMatching else SimulatorColours.Edge_NonMatched
+                for edge in matching.edges:
+                    pygame.draw.line(self.screen, color, self.graph_vis[edge[0]], self.graph_vis[edge[1]], 3)
 
             for node in self.graph.nodes:
-                colour = (0,0,250) if Simulator.CheckInNode(self.graph_vis, node, mouse_pos) else (255,0,0)
+                colour = SimulatorColours.Vertex_Hover if Simulator.CheckInNode(self.graph_vis, node, mouse_pos) else SimulatorColours.Vertex_normal
                 pygame.draw.circle(self.screen, colour, self.graph_vis[node], self.nodeRadius)
 
             pygame.display.flip()

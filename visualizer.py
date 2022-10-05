@@ -120,6 +120,10 @@ class GraphVisualizer:
     def Show():
         plt.show()
 
+    
+    def deleteNode(self, node):
+        del self.graphNodes[node]
+
     #Overrides
     def __setitem__(self, node, position : tuple):
         self.graphNodes[node] = position
