@@ -85,6 +85,23 @@ class GraphVisualizer:
 
             self.graphNodes[node] = (r_offset + Vector2.UP()*i).asTuple()
 
+    def Tree(self, root):
+        """
+        Distribute the graphnodes into a tree or tree-like rooted at root
+        """
+        depths = Search.BFStree(self.graph, root)
+        maxdepth = max(depths.values())
+        head = Vector2(0, maxdepth/2)
+
+        for d in range(maxdepth+1):
+            layer = [v for v in depths if depths[v] == d]
+            left = Vector2(-len(layer)/2,0) + head+(d*Vector2.DOWN())
+            for i, node in enumerate(layer):
+                self.graphNodes[node] = (left+i*Vector2.RIGHT()).asTuple()
+
+
+        
+
     def Transform(self, scale=1, rotate=0, offset=(0,0)):
         """
         Call assumes graph with no external manipulations
@@ -116,6 +133,8 @@ class GraphVisualizer:
         if edgeColor != None:
             ax.add_collection(LineCollection(lines, colors=edgeColor))
 
+    def PlotReset():
+        del GraphVisualizer.ax
 
     def Show():
         plt.show()

@@ -71,13 +71,13 @@ class Graph:
 
     #Some query functions
 
-    def getNodes(self):
+    def getNodes(self) -> list:
         """
         Returns list of nodes
         """
-        return self.nodes.keys()
+        return list(self.nodes.keys())
 
-    def getWeight(self, u, v):
+    def getWeight(self, u, v) -> float:
         """
         Returns weight of the given edge. Weight is 0 if edge doesn't exit
         """
@@ -85,29 +85,37 @@ class Graph:
             return self.nodes[u][v]
         return 0
     
-    def isEdge(self, u, v):
-        return self.getWeight(u, v) != 0
+    def isEdge(self, u, v) -> bool:
+        if not self.isNode(u):
+            return False
+        return v in self.nodes[u]
 
-    def isNode(self, node):
+    def isNode(self, node) -> bool:
         try:
             self.nodes[node]
             return True
         except:
             return False
 
-    def getNeighbourCount(self, u):
+    def getNeighbourCount(self, u) -> int:
         """
         Returns number of neighbors for a vertex
         """
         return len(self.nodes[u])
 
-    def getNeighbours(self, u):
+    def getNeighbours(self, u) -> dict:
         """
         Returns {neighbour: weight} dictionary
         """
         return self.nodes[u]
 
-    def getEdges(self):
+    def getNeighboursList(self, u) -> list:
+        """
+        Returns list of neighbors
+        """
+        return list(self.nodes[u].keys())
+
+    def getEdges(self) -> list:
         """
         Returns a list of edges in order of added nodes
         """

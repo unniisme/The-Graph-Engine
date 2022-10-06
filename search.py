@@ -1,11 +1,11 @@
-import graph
+from graph import *
 from queue import PriorityQueue
 
 class Search:
 
     globalData = {}
 
-    def arbitrarySearch(graph : graph.Graph, start, end=None, evaluator=lambda x:1):
+    def arbitrarySearch(graph : Graph, start, end=None, evaluator=lambda x:1):
         """
         Runs a search algorithm that keeps a priority queue.
         Can effectively be used as BFS, best first search, A* search and Dijkstra's 
@@ -36,7 +36,7 @@ class Search:
 
             if curr in end:
                 expanded.append(curr)
-                break
+                return expanded
 
             for neigh in graph.getNeighbours(curr):
                 if neigh in expanded:
@@ -49,11 +49,34 @@ class Search:
         Search.searchPath = None    # No solution path
         return expanded
 
-    def BFS(graph : graph.Graph, start, end=None, getSearchEdges = False):
+    def BFS(graph : Graph, start, end=None, getSearchEdges = False):
 
         return Search.arbitrarySearch(graph, start, end)
 
-    def DFS(graph : graph.Graph, start, end=None, getSearchEdges=False):
+    def BFStree(graph : Graph, start):
+        """
+        Recursive BFS that returns a dictionary of node depth from start
+        """
+        # Better run a BFS and divide accordingly
+
+        BFSdepth = {}
+
+        def rec_call(node, depth):
+            try:
+                BFSdepth[node]
+                return
+            except:
+                BFSdepth[node] = depth
+                for neig in graph.getNeighbours(node):
+                    rec_call(neig, depth+1)
+
+        rec_call(start, 0)
+
+        return BFSdepth
+
+
+
+    def DFS(graph : Graph, start, end=None, getSearchEdges=False):
         Search.globalData["DFScounter"] = 0
         def dfsEval(edge):
             Search.globalData["DFScounter"] -= 1
@@ -63,7 +86,7 @@ class Search:
         Search.globalData.pop("DFScounter")
         return searchRes
     
-    def Bipartition(graph: graph.Graph):
+    def Bipartition(graph: Graph):
         """
         Returns a pair of sets of vertices representing left and right bipartitions is bipartite
         Else returns None

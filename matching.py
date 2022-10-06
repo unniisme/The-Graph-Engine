@@ -96,6 +96,14 @@ class MaximumMatching:
     def FindMaximum(self):
         pass
 
+
+    # Queries:
+    def isAlternating(self, path):
+        if len(path) == 0:
+            return True
+
+        # Complete
+
 class BipartiteMaximumMatching(MaximumMatching):
 
     def __init__(self, matching : Matching, bipartition):
@@ -105,20 +113,29 @@ class BipartiteMaximumMatching(MaximumMatching):
         self.A0 = [v for v in matching.getUnsaturatedVertices() if v in bipartition[0]]
         self.B0 = [v for v in matching.getUnsaturatedVertices() if v in bipartition[1]]
         
+        self.H = BipartiteMaximumMatching.ModifiedGraph(matching, bipartition)
+
+    def ModifiedGraph(matching, bipartition):
+        """
+        Returns a modified graph with Edges directed from B to A if edge in M and A to B otherwise.
+        """
         H = UnweightedGraph()
-        for u in bipartition[0]:    # A -> B if in M
-            if matching.matchingGraph.isNode(u):
-                print(matching.matchingGraph.getNeighbours(u))
-        #NOT FINISHED DO THIS HERE NOW DON"T PUSH OTHERWISE I KNOW YOU"RE A LAZY FICK
+        H.addNodes(matching.graph.getNodes())       # Modified graph, with directions according to M
         for u in bipartition[1]:    # B -> A if in M
+            if matching.matchingGraph.isNode(u):
+                H.addEdge(u, matching.matchingGraph.getNeighboursList(u)[0])
+        for u in bipartition[0]:    # A -> B if not in M
             for v in matching.graph.getNeighbours(u):
                 if not matching.matchingGraph.isEdge(u, v):
-                    H.isEdge(u, v)
-
-        self.H = H
+                    H.addEdge(u, v)
+        return H
 
 
     def getAugmentingPath(self):
+        """
+        Runs DFS on the set of unsaturated vertices in A, stops and returns M-Augmenting path if DFS terminates in an unsaturated vertex in B.
+        Else returns None
+        """
         A0 = self.A0.copy()
         while len(A0):
             a0 = A0.pop()
@@ -127,6 +144,47 @@ class BipartiteMaximumMatching(MaximumMatching):
                 return Search.searchPath
 
         return None
+
+    def Augment(self, augPath : list) -> bool:
+        """
+        Augments the Given path.
+        Returns if augmentation was successful.
+        """
+        #Check if augPath is M-Augmenting, or make it so that removing edges phases out independant vertices in matchingGraph
+
+        for edge in zip(augPath, augPath[1:]):
+            if self.matching.matchingGraph.isEdge(*edge):
+                self.matching.matchingGraph.deleteEdge(*edge)
+            else:
+                self.matching.matchingGraph.addNodes(edge)
+                self.matching.matchingGraph.addEdge(*edge)
+            # Remove or add edges to matchingGraph
+            # Consistency here is that matchingGraph only contains saturated nodes
+
+            # Flip corresponding edge in H
+            if self.H.isEdge(*edge):
+                self.H.deleteEdge(*edge)
+                self.H.addEdge(edge[1], edge[0])
+            else:
+                self.H.deleteEdge(edge[1], edge[0])
+                self.H.addEdge(*edge)
+
+        self.A0.remove(augPath[0])
+        self.B0.remove(augPath[-1])
+
+    def FindMaximum(self):
+        """
+        Finds augmenting path and augments it until no longer possible
+        """
+
+        path = self.getAugmentingPath()
+        while path != None:
+
+            self.Augment(path)
+            path = self.getAugmentingPath()
+
+
+        
 
         
 

@@ -56,8 +56,6 @@ class Simulator:
 
         dragging = None
         edgeStart = None
-        matching = Matching(self.graph, [])
-        self.matching = matching
 
         while self.running:
             self.screen.fill((255,255,255))
@@ -76,7 +74,6 @@ class Simulator:
                     del self.graph_vis
                     self.graph = gr.SimpleGraph()
                     self.graph_vis = visualizer.GraphVisualizer(self.graph)
-                    matching = Matching(self.graph, [])
                 
                 if e.type == pygame.KEYDOWN and e.key == pygame.K_b:
                     partition = Search.Bipartition(self.graph)
@@ -120,14 +117,6 @@ class Simulator:
                                         self.graph.addEdge(edgeStart, edgeEnd)
                                     else:
                                         self.graph.deleteEdge(edgeStart, edgeEnd)
-                                elif state == s_matching:
-                                    edge = (edgeStart, edgeEnd)
-                                    backedge = (edgeEnd, edgeStart)
-                                    if edge in matching.edges or backedge in matching.edges:
-                                        matching.RemoveEdge(edge)
-                                        matching.RemoveEdge(backedge)
-                                    else:
-                                        matching.AddEdge(edge)
                                 edgeStart = None
 
                         
@@ -150,11 +139,7 @@ class Simulator:
             if edges!=None:
                 for edge in edges:
                     pygame.draw.line(self.screen, SimulatorColours.Edge_normal, self.graph_vis[edge[0]], self.graph_vis[edge[1]])
-                
-            if state == s_matching:
-                color = SimulatorColours.Edge_Matched if matching.isMatching else SimulatorColours.Edge_NonMatched
-                for edge in matching.edges:
-                    pygame.draw.line(self.screen, color, self.graph_vis[edge[0]], self.graph_vis[edge[1]], 3)
+            
 
             for node in self.graph.nodes:
                 colour = SimulatorColours.Vertex_Hover if Simulator.CheckInNode(self.graph_vis, node, mouse_pos) else SimulatorColours.Vertex_normal
