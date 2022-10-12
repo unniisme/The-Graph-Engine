@@ -85,10 +85,33 @@ class GraphVisualizer:
 
             self.graphNodes[node] = (r_offset + Vector2.UP()*i).asTuple()
 
-    def Tree(self, root):
+    def Tree(self, root, head = (0,0), spread=5):
         """
         Distribute the graphnodes into a tree or tree-like rooted at root
         """
+        head = Vector2(head) #starts from origin
+
+        # Uhh this isn't exactly BFS, come back later
+        BFSdepth = {}
+
+        def rec_call(node, depth, head):
+            try:
+                BFSdepth[node]
+                return
+            except:
+                self.graphNodes[node] = head.asTuple()
+                span = 1#spread/self.graph.getNeighbourCount(node)
+                left = head + Vector2.DOWN() + (self.graph.getNeighbourCount(node)/2)*Vector2.LEFT()
+                BFSdepth[node] = depth
+                for i, neig in enumerate(self.graph.getNeighboursList(node)):
+                    rec_call(neig, depth+1, left+span*i*Vector2.RIGHT())
+
+        rec_call(root, 0, head)
+
+        return BFSdepth
+
+
+        #Better run a BFS and make tree accordingly
         depths = Search.BFStree(self.graph, root)
         maxdepth = max(depths.values())
         head = Vector2(0, maxdepth/2)

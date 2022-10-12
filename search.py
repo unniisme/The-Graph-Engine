@@ -53,11 +53,10 @@ class Search:
 
         return Search.arbitrarySearch(graph, start, end)
 
-    def BFStree(graph : Graph, start):
+    def DFStree(graph : Graph, start):
         """
-        Recursive BFS that returns a dictionary of node depth from start
+        Recursive DFS that returns a dictionary of node depth from start
         """
-        # Better run a BFS and divide accordingly
 
         BFSdepth = {}
 
