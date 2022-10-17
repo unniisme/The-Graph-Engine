@@ -18,6 +18,17 @@ class SimulatorColours(ColourPalette):
     Edge_Matched = (200,10,10)
     Edge_NonMatched = (10,10,100)
 
+class AnimationHolder:
+
+    def __init__(self, info : dict = {}):
+        self.info = info
+
+    def __setitem__(self, index, item):
+        self.info[index] = item
+
+    def __getitem__(self, index):
+        return self.info[index]
+
 class Simulator:
     """
     Simulates the graph using Pygame
@@ -51,6 +62,7 @@ class Simulator:
 
         # MenuStates
         state = 0
+        s_uninteractive = -1
         s_base = 0
         s_matching = 1
 
@@ -69,6 +81,11 @@ class Simulator:
                 if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
                     running = False
                     return 0
+
+                # Unresponsive
+                if state == s_uninteractive:
+                    break
+
                 if e.type == pygame.KEYDOWN and e.key == pygame.K_r:
                     del self.graph
                     del self.graph_vis
@@ -78,8 +95,15 @@ class Simulator:
                 if e.type == pygame.KEYDOWN and e.key == pygame.K_b:
                     partition = Search.Bipartition(self.graph)
                     if partition!=None:
-                        self.graph_vis.Bipartition(*partition)
-                        self.graph_vis.Transform(self.screenSize[1]/(2*len(self.graph.nodes)), 0, Vector2(self.screenSize)/2)
+                        self.TransitionAnimator = AnimationHolder()
+                        self.TransitionAnimator["graph_vis_init"] = visualizer.GraphVisualizer(self.graph)
+                        self.TransitionAnimator["graph_vis_init"].CopyGraphNodes(self.graph_vis)
+                        self.TransitionAnimator["graph_vis_fin"] = visualizer.GraphVisualizer(self.graph)
+                        self.TransitionAnimator["graph_vis_fin"].CopyGraphNodes(self.graph_vis)
+                        self.TransitionAnimator["graph_vis_fin"].Bipartition(*partition)
+                        self.TransitionAnimator["graph_vis_fin"].Transform(self.screenSize[1]/(2*len(self.graph.nodes)), 0, Vector2(self.screenSize)/2)
+                        self.TransitionAnimator["t"] = 0
+                        state = s_uninteractive
 
                 #state change to matching
                 if e.type == pygame.KEYDOWN and e.key == pygame.K_m:
@@ -125,6 +149,22 @@ class Simulator:
                     if e.button == 1:
                         dragging = None
 
+            #Animation
+
+            if state==s_uninteractive:
+                if hasattr(self, "TransitionAnimator"):
+                    if self.TransitionAnimator["t"] >= 1:
+                        self.TransitionAnimator["t"] = 1
+
+                    for node in self.graph_vis.graphNodes:
+                        self.graph_vis[node] = Vector2.lerp(Vector2(self.TransitionAnimator["graph_vis_init"][node]), Vector2(self.TransitionAnimator["graph_vis_fin"][node]), self.TransitionAnimator["t"]).asTuple()
+                        self.TransitionAnimator["t"] += 1/(self.clock.get_fps()*2)
+
+                    if self.TransitionAnimator["t"] >= 1:
+                        state = s_base
+                        del self.TransitionAnimator
+                    
+
             #condition handlers
             if dragging != None:
                 self.graph_vis[dragging] = mouse_pos
@@ -149,7 +189,8 @@ class Simulator:
             self.clock.tick(60)
 
 
-a = Simulator()
-a.Start()
+if __name__ == '__main__':
+    a = Simulator()
+    a.Start()
 
     

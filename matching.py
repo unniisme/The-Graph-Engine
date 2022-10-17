@@ -2,7 +2,7 @@ from graph import *
 from search import Search
 
 class Matching:
-    def __init__(self, g : Graph, edges=[]):
+    def __init__(self, g : SimpleGraph, edges=[]):
         """
         Define a matching on graph g consisting of the edges in edges.
         Unweighted Matching.

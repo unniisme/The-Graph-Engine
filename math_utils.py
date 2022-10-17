@@ -151,6 +151,17 @@ class Vector2:
         """Round the vector to the nearest integer vector"""
         return Vector2(round(self[0]), round(self[1]))
 
+
+    #Vector operators
+    def lerp(start, end, t):
+        return start + t*(end-start)
+
+    def slerp(start, end, t : float, omega=90):
+        omega = math.radians(omega)
+
+        return ((math.sin((1-t)*omega)/math.sin(omega)) * start) + ((math.sin((t)*omega)/math.sin(omega))*end)
+
+
     #global constants
     def UP():
         return Vector2(0, 1)
