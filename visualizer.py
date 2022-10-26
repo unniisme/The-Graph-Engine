@@ -21,6 +21,13 @@ class GraphVisualizer:
     
     def CopyGraphNodes(self, other):
         self.graphNodes = other.graphNodes.copy()
+        dellist = []
+        for v in self.graphNodes:
+            if v not in self.graph.nodes:
+                dellist.append(v)
+        
+        for v in dellist:
+            del self.graphNodes[v]
     
     def Cluster(self):
         """
@@ -134,15 +141,16 @@ class GraphVisualizer:
             self.graphNodes[node] = (((scale*Vector2(self.graphNodes[node])).RotateDeg(rotate)) + Vector2(offset)).asTuple()
 
 
-    def Plot(self, vertexColor = 'b', edgeColor = 'b'):
+    def Plot(self, vertexColor = 'b', edgeColor = 'b', directed = False, weighted = False):
         """
         Draw matplotlib graphs of the graphs
         keep any color = None to not draw
         """
         lines = []
-        for u in self.graph.nodes:
-            for v in self.graph.nodes[u]:
-                lines.append([self.graphNodes[u], self.graphNodes[v]])
+        if not directed:
+            for u in self.graph.nodes:
+                for v in self.graph.nodes[u]:
+                    lines.append([self.graphNodes[u], self.graphNodes[v]])
 
         if not hasattr(GraphVisualizer, 'ax'):
             fig, GraphVisualizer.ax = plt.subplots()
@@ -153,8 +161,24 @@ class GraphVisualizer:
         for key in self.graphNodes:
             ax.annotate(key, self.graphNodes[key])
         
-        if edgeColor != None:
-            ax.add_collection(LineCollection(lines, colors=edgeColor))
+        if not directed:
+            if edgeColor != None:
+                ax.add_collection(LineCollection(lines, colors=edgeColor))
+
+        else:
+            for u in self.graph.nodes:
+                for v in self.graph.nodes[u]:
+                    ax.arrow(*self.graphNodes[u], *((Vector2(self.graphNodes[v]) - Vector2(self.graphNodes[u])).asTuple()), head_width=0.03, length_includes_head = True, color=edgeColor)
+
+        if weighted:
+            for u in self.graph.nodes:
+                for v in self.graph.nodes[u]:
+                    if self.graph.getWeight(u, v) != 0:
+                        dirV = (Vector2(self.graphNodes[v]) - Vector2(self.graphNodes[u]))
+                        if dirV.magnitude == 0:
+                            continue
+                        pos = (Vector2(self.graphNodes[u]) + dirV/2 + dirV.RotateDeg(90).Normalized()*dirV.magnitude/50).asTuple()
+                        ax.annotate(str(self.graph.getWeight(u, v)), xy=pos)
 
     def PlotReset():
         del GraphVisualizer.ax

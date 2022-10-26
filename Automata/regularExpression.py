@@ -100,11 +100,13 @@ def REtoNFA(exp:list, alphabet:set) -> NFA:
 
 
 
-
-nfa = REtoNFA(RegularExpression.EvaluateString(input()), {"0", "1"})
-dfa = NFAtoDFA(nfa)
-dfa = dfa.MinimizedDFA()
-print(len(dfa.Q))
-print(dfa)
-while True:
-    print(nfa.CheckAccept(input()))
+if __name__ == '__main__':
+    iS = input()
+    iS = iS.replace("{}", "(q+w+e+r+t+y+u+i+o+p+a+s+d+f+g+h+j+k+l+z+x+c+v+b+n+m)")
+    print(iS)
+    nfa = REtoNFA(RegularExpression.EvaluateString(iS), set("qwertyuiopasdfghjklzxcvbnm "))
+    #dfa = NFAtoDFA(nfa)
+    #dfa = dfa.MinimizedDFA()
+    #print(len(dfa.Q))
+    while True:
+        print(nfa.CheckAccept(input()))

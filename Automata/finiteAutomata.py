@@ -1,5 +1,6 @@
 import itertools
 from automataError import AutomataError
+## aahh I know I probably have to comment this whole thing
 
 class Uniq:
 
@@ -99,7 +100,7 @@ class DFA(FiniteAutomata):
         return True
 
 
-    def MinimizedDFA(dfa):
+    def MinimizedDFA(dfa : "DFA", makeuid : bool = True) -> "DFA":
         # Reachability
         def ReachableDFA(dfa) -> DFA:
             frontier = [dfa.s]
@@ -118,8 +119,14 @@ class DFA(FiniteAutomata):
 
             return DFA(Q, dfa.sigma, transitionTable, dfa.s, dfa.F)
 
+        def uid(dfa) -> DFA:
+            uidStates = {q : Uniq.getVal() for q in dfa.Q}
+            transitionTable = {uidStates[q] : {a : uidStates[dfa.delta(q,a)] for a in dfa.sigma} for q in dfa.Q}
 
-        #dfa = ReachableDFA(dfa)
+            return DFA({uidStates[q] for q in dfa.Q}, dfa.sigma, transitionTable, uidStates[dfa.s], {uidStates[q] for q in dfa.F})
+
+
+        dfa = ReachableDFA(dfa)
 
         partitions = set()
         oldPartition = None
@@ -185,10 +192,10 @@ class DFA(FiniteAutomata):
                 if f in partition:
                     F.add(partition)
                     continue
-        return DFA(partitions, dfa.sigma, partitionTransitions, s, F)       
-                                
-    def MinimizeDFA(self):
-        self = self.MinimizedDFA()
+        if makeuid:
+            return uid(DFA(partitions, dfa.sigma, partitionTransitions, s, F))
+        return DFA(partitions, dfa.sigma, partitionTransitions, s, F)
+        
         
 
 
@@ -290,7 +297,7 @@ class NFA(FiniteAutomata):
         if len(s) == 0:
             for q in A:
                 A = A.union(self.delta(q))
-            return A
+            return self.GetEpsilonUnion(A)
         
         B = set()
         for q in self.delta_cap(self.delta_cap(A,[]), s[:-1]):
@@ -357,8 +364,9 @@ class NFA(FiniteAutomata):
             out += "\n"
 
             for a in self.sigma:
-                out += "\t" + str(a) + " : " + str(self.delta(q,a))
-                out += "\n"
+                if self.delta(q,a) != set():
+                    out += "\t" + str(a) + " : " + str(self.delta(q,a))
+                    out += "\n"
         return out
 
 
@@ -399,7 +407,7 @@ if __name__=="__main__":
 
     dfa = DFA({0,1,2,3}, {"0","1"}, {0 : {"0" : 0, "1" : 2}, 1 : {"0" : 1, "1" : 2}, 2 : {"0" : 2, "1" : 2}, 3 : {"0" : 3, "1" : 2}}, 0, {2})
     print(dfa)
-    print(dfa.MinimizeDFA())
+    print(dfa.MinimizedDFA())
     while True:
         print(dfa.CheckAccept(input()))
 
