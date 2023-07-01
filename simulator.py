@@ -7,7 +7,9 @@ from search import *
 #Not working for now
 
 class ColourPalette:
-    Red = (255,0,0),
+    Red = (255,0,0)
+    Green = (0,255,0)
+    Blue = (0,0,255)
 
 class SimulatorColours(ColourPalette):
     Vertex_normal = (255,0,0)
@@ -131,7 +133,14 @@ class Simulator:
                     elif e.button == 3:
                         if edgeStart == None:
                             edgeStart = Simulator.CheckInAllNodes(self.graph_vis, mouse_pos)
-                        else:
+
+                        
+
+                if e.type == pygame.MOUSEBUTTONUP:
+                    if e.button == 1:
+                        dragging = None
+                    elif e.button == 3:
+                        if edgeStart != None:
                             edgeEnd = Simulator.CheckInAllNodes(self.graph_vis, mouse_pos)
                             if edgeEnd == None:
                                 edgeStart = None
@@ -142,12 +151,6 @@ class Simulator:
                                     else:
                                         self.graph.deleteEdge(edgeStart, edgeEnd)
                                 edgeStart = None
-
-                        
-
-                if e.type == pygame.MOUSEBUTTONUP:
-                    if e.button == 1:
-                        dragging = None
 
             #Animation
 
@@ -190,6 +193,19 @@ class Simulator:
 
 
 if __name__ == '__main__':
+    infoString = """Welcome to The Graph Engine.
+    
+To add a node to the graph, left-click anywhere on the screen.
+To delete a node from the graph, middle-click on the node.
+To move a node, simply left-click drag it.
+To create an edge between two nodes, press and hold the right mouse button on the first node, drag the cursor to the second node, and release the right mouse button.
+To delete an edge between two nodes, press and hold the right mouse button on the first node, drag the cursor to the second node, and release the right mouse button.
+Press the 'r' key to reset the graph and remove all nodes and edges.
+Press the 'b' key to perform a bipartition on the graph, if possible.
+Press the 'm' key to toggle between the base state and the matching state -- Does not work currently --"""
+
+    print (infoString)
+
     a = Simulator()
     a.Start()
 
