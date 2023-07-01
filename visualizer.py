@@ -152,8 +152,9 @@ class GraphVisualizer:
                 for v in self.graph.nodes[u]:
                     lines.append([self.graphNodes[u], self.graphNodes[v]])
 
-        if not hasattr(GraphVisualizer, 'ax'):
-            fig, GraphVisualizer.ax = plt.subplots()
+        if not hasattr(GraphVisualizer, 'ax') or not hasattr(GraphVisualizer, 'ax'):
+            GraphVisualizer.fig, GraphVisualizer.ax = plt.subplots()
+
         ax = GraphVisualizer.ax
 
         if vertexColor != None:
@@ -182,6 +183,7 @@ class GraphVisualizer:
 
     def PlotReset():
         del GraphVisualizer.ax
+        del GraphVisualizer.fig
 
     def Show():
         plt.show()
