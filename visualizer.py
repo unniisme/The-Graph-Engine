@@ -188,6 +188,8 @@ class GraphVisualizer:
     def Show():
         plt.show()
 
+    def Title(title):
+        plt.title(title)
     
     def deleteNode(self, node):
         del self.graphNodes[node]
