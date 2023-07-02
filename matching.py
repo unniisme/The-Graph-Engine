@@ -34,7 +34,7 @@ class Matching:
         if not self.CheckMatching():
             raise MatchingError("Not a matching")
 
-    def AddEdge(self, edge):
+    def addEdge(self, edge):
         self.matchingGraph.addEdge(*edge)
 
         # Consistency
@@ -44,7 +44,7 @@ class Matching:
         return self.isMatching
 
 
-    def RemoveEdge(self, edge):
+    def deleteEdge(self, edge):
         self.matchingGraph.deleteEdge(*edge)
 
         # Consistency
@@ -105,6 +105,29 @@ class MaximumMatching:
         # Complete
 
 class BipartiteMaximumMatching(MaximumMatching):
+    """
+    This class represents a maximum bipartite matching in a bipartite graph.
+
+    Args:
+        matching (Matching): An instance of the Matching class representing the initial matching.
+        bipartition (tuple): A tuple containing two lists representing the bipartition of the graph.
+
+    Attributes:
+        matching (Matching): An instance of the Matching class representing the current matching.
+        bipartition (tuple): A tuple containing two lists representing the bipartition of the graph.
+        A0 (list): List of unsaturated vertices in the first partition (A) and in the bipartition.
+        B0 (list): List of unsaturated vertices in the second partition (B) and in the bipartition.
+        H (UnweightedGraph): A modified directed graph with edges directed from B to A if the edge is in the matching (M),
+                             and from A to B otherwise.
+
+    Methods:
+        ModifiedGraph(matching, bipartition): Returns a modified graph with edges directed based on the matching (M).
+        getAugmentingPath(): Runs DFS on the set of unsaturated vertices in A and returns an M-augmenting path if DFS
+                             terminates in an unsaturated vertex in B. Otherwise, returns None.
+        Augment(augPath): Augments the given path, updating the matching and the modified graph.
+        FindMaximum(): Finds an augmenting path and augments it until no longer possible, updating the matching.
+
+    """
 
     def __init__(self, matching : Matching, bipartition):
         self.matching = matching
@@ -154,10 +177,10 @@ class BipartiteMaximumMatching(MaximumMatching):
 
         for edge in zip(augPath, augPath[1:]):
             if self.matching.matchingGraph.isEdge(*edge):
-                self.matching.matchingGraph.deleteEdge(*edge)
+                self.matching.deleteEdge(edge)
             else:
                 self.matching.matchingGraph.addNodes(edge)
-                self.matching.matchingGraph.addEdge(*edge)
+                self.matching.addEdge(edge)
             # Remove or add edges to matchingGraph
             # Consistency here is that matchingGraph only contains saturated nodes
 
