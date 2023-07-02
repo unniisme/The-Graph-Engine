@@ -15,7 +15,7 @@ class Graph:
     #------------------------  
     def copy(self):
         copyGraph = Graph()
-        copyGraph.nodes = self.nodes
+        copyGraph.nodes = self.nodes.copy()
         return copyGraph
 
     def addNode(self, node):
