@@ -11,7 +11,12 @@ class Graph:
 
     def __repr__(self):
         return self.string()  
+
     #------------------------  
+    def copy(self):
+        copyGraph = Graph()
+        copyGraph.nodes = self.nodes
+        return copyGraph
 
     def addNode(self, node):
         if  node not in self.nodes:
